@@ -1,7 +1,20 @@
 const express = require('express');
 
 const app = express();
+
 app.use(express.json());
+
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
 
 const API_KEY = process.env.BONUSPLUS_API_KEY;
 const BONUS_AMOUNT = process.env.BONUS_AMOUNT || 1000;
@@ -24,7 +37,6 @@ app.post('/app-bonus', async (req, res) => {
 
     const auth = 'ApiKey ' + Buffer.from(API_KEY).toString('base64');
 
-    // 🔍 Ищем клиента
     const findResponse = await fetch(`https://bonusplus.pro/api/customer?phone=${phone}`, {
       headers: { Authorization: auth }
     });
@@ -37,7 +49,6 @@ app.post('/app-bonus', async (req, res) => {
       customer = null;
     }
 
-    // 🆕 Создаем если нет
     if (!customer || !customer.phone) {
       const createResponse = await fetch('https://bonusplus.pro/api/customer', {
         method: 'POST',
@@ -54,11 +65,9 @@ app.post('/app-bonus', async (req, res) => {
       const createData = await createResponse.text();
       console.log('CREATE CUSTOMER:', createData);
 
-      // даём время системе создать клиента
       await new Promise(resolve => setTimeout(resolve, 1500));
     }
 
-    // 💰 Начисляем бонусы
     const bonusResponse = await fetch(`https://bonusplus.pro/api/customer/${phone}/balance`, {
       method: 'PATCH',
       headers: {
