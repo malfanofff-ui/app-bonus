@@ -36,8 +36,24 @@ app.post('/app-bonus', async (req, res) => {
       customer = null;
     }
 
-    if (!customer || !customer.phoneNumber) {
-      await fetch('https://bonusplus.pro/api/customer', {
+ if (!customer || !customer.phoneNumber) {
+  const createResponse = await fetch('https://bonusplus.pro/api/customer', {
+    method: 'POST',
+    headers: {
+      Authorization: auth,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      phoneNumber: phone
+    })
+  });
+
+  const createData = await createResponse.text();
+  console.log('CREATE CUSTOMER:', createData);
+
+  // 🔥 ВАЖНО — подождать создание
+  await new Promise(resolve => setTimeout(resolve, 1000));
+}
         method: 'POST',
         headers: {
           Authorization: auth,
