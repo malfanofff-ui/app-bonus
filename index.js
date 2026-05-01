@@ -77,7 +77,7 @@ app.post('/app-bonus', async (req, res) => {
       body: JSON.stringify({
         amount: Number(BONUS_AMOUNT),
         activatedInDays: 0,
-        burnsInDays: 7
+        burnsInDays: 30
       })
     });
 
